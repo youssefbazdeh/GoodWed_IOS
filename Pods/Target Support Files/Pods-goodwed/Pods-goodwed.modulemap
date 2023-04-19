@@ -1,0 +1,6 @@
+framework module Pods_goodwed {
+  umbrella header "Pods-goodwed-umbrella.h"
+
+  export *
+  module * { export * }
+}
