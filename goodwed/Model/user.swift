@@ -68,7 +68,7 @@ struct ChangePasswordRequest: Encodable {
 
 
 struct User: Decodable {
-    let _id: String
+    let _id: String?
     let username: String
     let fullname: String
     let email: String
@@ -82,5 +82,4 @@ struct UpdateUserRequest: Encodable {
     let username: String?
     let fullname: String
     let email: String?
-    let datedenaissance: String?
 }

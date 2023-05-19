@@ -62,7 +62,7 @@ func validateConfirmPassword() {
 }
     
     func sendEmail(request: SendMailRequest, completion: @escaping (Result<String, Error>) -> ()) -> DataRequest {
-        let url = "http://172.17.0.150:9091/user/forget"
+        let url = "\(base_url)/user/forget"
         
         do {
             let encodedRequest = try JSONEncoder().encode(request)
@@ -110,7 +110,7 @@ func validateConfirmPassword() {
     
     
     func VerifyCodeOtp(request: VerifyCodeRequest, completion: @escaping (Result<ErrorResponse, Error>) -> ()) -> DataRequest {
-        let url = "http://192.168.31.33:9092/user/reset"
+        let url = "\(base_url)/user/reset"
         
         do {
             let encodedRequest = try JSONEncoder().encode(request)
@@ -150,7 +150,7 @@ func validateConfirmPassword() {
     
     func ResetPassword(request: ResetPasswordRequest, completion: @escaping (Result<ErrorResponse, Error>) -> Void) -> DataRequest {
     
-        let url = "http://172.17.0.150:9091/user/change"
+        let url = "\(base_url)/user/change"
         
         do {
             let encodedRequest = try JSONEncoder().encode(request)

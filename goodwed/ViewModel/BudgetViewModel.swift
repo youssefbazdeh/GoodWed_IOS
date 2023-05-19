@@ -13,7 +13,7 @@ class BudgetViewModel: ObservableObject {
     }
     
     func deleteBudget(id: String) {
-        AF.request("http://172.17.0.237:9092/budget/\(id)", method: .delete).validate().response { [weak self] response in
+        AF.request("\(base_url)/budget/\(id)", method: .delete).validate().response { [weak self] response in
             switch response.result {
             case .success:
                 self?.budgets.removeAll { $0._id == id } // Remove the checklist from the array
@@ -24,7 +24,7 @@ class BudgetViewModel: ObservableObject {
     }
     
     func AddBudget(request: BudgetRequest, completion: @escaping (Result<BudgetResponse, Error>) -> ()) -> DataRequest {
-        let url = "http://172.17.0.237:9092/budget/user/642f9382de576283773909ba"
+        let url = "\(base_url)/budget/user/642f9382de576283773909ba"
         
         do {
             let encodedRequest = try JSONEncoder().encode(request)
@@ -77,7 +77,7 @@ class BudgetViewModel: ObservableObject {
 }
 
 func fetchBudget( completion: @escaping(Result<[budget],APIError>) -> Void) {
-    let url = URL(string : "http://172.17.0.237:9092/budget/user/642f9382de576283773909ba")
+    let url = URL(string : "\(base_url)/budget/user/642f9382de576283773909ba")
     //createURL(for:   .movie, page: nil, limit: nil)
     fetch1(type: [budget].self, url: url, completion: completion)
 }

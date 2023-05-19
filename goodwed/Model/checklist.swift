@@ -23,13 +23,14 @@ struct ChecklistRequest: Encodable {
 struct ChecklistResponse: Decodable {
     let status: String
     let message: String
+    let data: checklist
 }
 struct ErrorResponse1: Decodable {
     let message: String
 }
 
 
-struct checklist: Decodable, Hashable {
+struct checklist: Decodable, Hashable ,Identifiable{
     let _id: String
     let nom: String
     let type: String
@@ -38,7 +39,11 @@ struct checklist: Decodable, Hashable {
     let date: String
     let status: String
     let __v: Int
+    var id: String{_id}
+
 }
+
+
 
 struct UpdateChecklistRequest: Encodable {
     let nom: String

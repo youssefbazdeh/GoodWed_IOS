@@ -31,7 +31,7 @@ struct ErrorResponse2: Decodable {
 }
 
 
-struct guest: Decodable,Hashable {
+struct guest: Decodable,Hashable ,Identifiable{
     let _id: String
     let name: String
     let lastname: String
@@ -42,6 +42,7 @@ struct guest: Decodable,Hashable {
     let adresse: String
     let note: String
     let __v: Int
+    var id: String{_id}
 }
 
 struct UpdateGuestRequest: Encodable {

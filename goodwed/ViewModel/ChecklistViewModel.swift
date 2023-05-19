@@ -19,7 +19,7 @@ class ChecklistViewModel: ObservableObject {
     }
     
     func deleteChecklist(id: String) {
-        AF.request("http://172.17.0.237:9092/checklist/\(id)", method: .delete).validate().response { [weak self] response in
+        AF.request("\(base_url)/checklist/\(id)", method: .delete).validate().response { [weak self] response in
             switch response.result {
             case .success:
                 self?.checklists.removeAll { $0._id == id } // Remove the checklist from the array
@@ -50,7 +50,7 @@ class ChecklistViewModel: ObservableObject {
             multipartFormData.append(Data(note.utf8), withName: "note")
             multipartFormData.append(Data(date.utf8), withName: "date")
             multipartFormData.append(Data(status.utf8), withName: "status")
-        }, to: "http://172.17.0.237:9092/checklist/user/642f9382de576283773909ba", method: .post, headers: headers, interceptor: nil, fileManager: FileManager(), requestModifier: nil)
+        }, to: "http://\(base_url)/checklist/user/642f9382de576283773909ba", method: .post, headers: headers, interceptor: nil, fileManager: FileManager(), requestModifier: nil)
         .validate()
         .response { response in
             switch response.result {
@@ -58,10 +58,48 @@ class ChecklistViewModel: ObservableObject {
                 completion(.success(()))
             case .failure(let error):
                 completion(.failure(error))
+               
                 print(error.localizedDescription)
             }
         }
     }
+    
+    
+    func UpdateChecklist(request: ChecklistRequest,id:String ,completion: @escaping (Result<ChecklistResponse, Error>) -> ()) -> DataRequest {
+        let url = "\(base_url)/checklist/\(id)"
+           
+           do {
+               let encodedRequest = try JSONEncoder().encode(request)
+               var urlRequest = try URLRequest(url: url, method: .put)
+               urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+               urlRequest.httpBody = encodedRequest
+               
+               return AF.request(urlRequest)
+                   .validate(statusCode: 200..<500)
+                   .validate(contentType: ["application/json"])
+                   .responseData { response in
+                       switch response.result {
+                           case .success(let data):
+                               do {
+                                   let ChecklistResponse = try JSONDecoder().decode(ChecklistResponse.self, from: data)
+                                   completion(.success(ChecklistResponse))
+                                   print(ChecklistResponse)
+                               } catch {
+                                   print(error)
+                                   completion(.failure(error))
+                               }
+                           case .failure(let error):
+                               print(error)
+                               completion(.failure(error))
+                       }
+                   }
+           } catch {
+               print(error)
+               completion(.failure(error))
+           }
+           // default return statement
+           return AF.request(url)
+       }
     
     func getChecklists() {
         fetchChecklists() { [weak self]  result in
@@ -84,7 +122,7 @@ class ChecklistViewModel: ObservableObject {
 
 
 func fetchChecklists( completion: @escaping(Result<[checklist],APIError>) -> Void) {
-    let url = URL(string : "http://172.17.0.237:9092/checklist/user/642f9382de576283773909ba")
+    let url = URL(string : "\(base_url)/checklist/user/642f9382de576283773909ba")
     //createURL(for:   .movie, page: nil, limit: nil)
     fetch(type: [checklist].self, url: url, completion: completion)
 }

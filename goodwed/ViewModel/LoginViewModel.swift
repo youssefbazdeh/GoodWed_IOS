@@ -7,10 +7,14 @@
 
 import Alamofire
 
+
 class LoginViewModel: ObservableObject {
     
     var loginRequest: LoginRequest?
     var errorMessage: String?
+    
+    let userDefaultsKey = "accessToken"
+    let idUser = "idUser"
  
     
     @Published var test: Bool = false
@@ -19,7 +23,7 @@ class LoginViewModel: ObservableObject {
         test=false
     }
     func login(request: LoginRequest, completion: @escaping (Result<LoginResponse, Error>) -> ()) -> DataRequest {
-        let url = "http://172.17.0.237:9092/user/login"
+        let url = "\(base_url)/user/login"
         let userDefault = UserDefaults.standard
         do {
             let encodedRequest = try JSONEncoder().encode(request)
@@ -30,17 +34,23 @@ class LoginViewModel: ObservableObject {
             return AF.request(urlRequest)
                 .validate(statusCode: 200..<300)
                 .validate(contentType: ["application/json"])
-                .responseData { response in
+                .responseData { [self] response in
                     switch response.result {
                         case .success(let data):
                             do {
                                 let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
                                 let user = loginResponse.user // Utilisez cette ligne pour récupérer toutes les informations sur l'utilisateur
                                
+
                                 completion(.success(loginResponse))
                                 self.test=true
                                 userDefault.set(self.test, forKey: "test")
-                                
+                                UserDefaults.standard.set(loginResponse.accessToken,forKey: self.userDefaultsKey)
+                                if let userID = loginResponse.user._id {
+                                    UserDefaults.standard.set(userID, forKey: self.idUser)
+                                    
+                                }
+
                             } catch {
                                 print(error)
                                 completion(.failure(error))
@@ -57,5 +67,6 @@ class LoginViewModel: ObservableObject {
         // default return statement
         return AF.request(url)
     }
+
 }
 

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication
 
 struct LoginView: View {
     @StateObject var loginViewModel = LoginViewModel()
@@ -16,6 +17,12 @@ struct LoginView: View {
     @State private var showHomePageView = false
     @State private var showForgetPassword = false
     @State var test = UserDefaults.standard.bool(forKey: "test")
+    
+    @State private var isUnlocked = false
+    @State private var showingLoggedInView = false
+    
+    let accessToken = UserDefaults.standard.string(forKey: "accessToken")
+    let idUser = UserDefaults.standard.string(forKey: "idUser")
 
 
     var body: some View {
@@ -24,6 +31,20 @@ struct LoginView: View {
         }else {
             ZStack {
                 Color(hex: "8A47EB")
+                VStack {
+                    if isUnlocked {
+                        NavigationLink("", destination: nav().navigationBarHidden(true), isActive: $showHomePageView)
+                    } else {
+                        Image(systemName: "faceid")
+                             .resizable()
+                             .frame(width: 50, height: 50)
+                             .foregroundColor(.white)
+                             .padding(.top,440)
+                             .onTapGesture {
+                                 authenticateWithBiometrics()
+                             }
+                    }
+                }
                 VStack {
                     Image("login")
                         .resizable()
@@ -131,9 +152,13 @@ struct LoginView: View {
                             switch result {
                             case .success(let response):
         
-                                // Action si la connexion est réussie
                                 print(response)
-                                UserDefaults.standard.set(response.accessToken, forKey: userDefaultsKey    )                                                                   
+
+                                print("this is your ac: \(accessToken)")
+                                print("this is your id: \(idUser)")
+        
+
+                              
                                 self.loginSuccess = true // Set login success to true
                                 //self.redirectToHomePage = true // Set redirectToHomePage to true
                             case .failure(let error):
@@ -166,7 +191,39 @@ struct LoginView: View {
             
         }
     }
-   
+    private func authenticateWithBiometrics() {
+            let context = LAContext()
+            var error: NSError?
+            
+            if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+                let reason = "Log in with Face ID"
+                context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
+                    if success {
+                        DispatchQueue.main.async {
+                            isUnlocked = true
+                            showHomePageView = true
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            let alertController = UIAlertController(title: "Authentication Failed", message: error?.localizedDescription ?? "Please try again", preferredStyle: .alert)
+                            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                            alertController.addAction(okAction)
+                            // You can present an alert in SwiftUI using an Alert view
+                            // Alternatively, you can use a Text view and set the text to the error message
+                            // You can also use a Toast view to show a brief message at the bottom of the screen
+                            // Example:
+                            // showAlert = true
+                            // alertMessage = error?.localizedDescription ?? "Please try again"
+                        }
+                    }
+                }
+            } else {
+                let alertController = UIAlertController(title: "Face ID Not Available", message: error?.localizedDescription ?? "Your device does not support Face ID", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                // Same as above
+            }
+        }
 }
 
 struct CheckboxToggleStyle: ToggleStyle {

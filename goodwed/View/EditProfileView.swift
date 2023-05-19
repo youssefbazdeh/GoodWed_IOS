@@ -1,82 +1,62 @@
-//
-//  EditProfileView.swift
-//  App-IOS
-//
-//  Created by Bilel Ouerghi on 14/4/2023.
-//
-
 import SwiftUI
 
 struct EditProfileView: View {
-    @State var image: UIImage?
-    @State var shouldShowImagePicker = false
-    @State private var username: String=""
-    //@State private var password: String=""
-    @State private var fullname: String=""
-    @State private var email: String=""
-    @State private var datenaissance: String=""
+    @State private var username: String = ""
+    @State private var email: String = ""
+    @State private var fullname: String = ""
+    @ObservedObject var viewModel: ProfileViewModel
+    @State private var showAlert = false // new state variable for showing/hiding the alert
     
-    @ObservedObject var viewModel = ProfileViewModel()
+    init(viewModel: ProfileViewModel) {
+        _username = State(initialValue: viewModel.user?.username ?? "")
+        _email = State(initialValue: viewModel.user?.email ?? "")
+        _fullname = State(initialValue: viewModel.user?.fullname ?? "")
+        self.viewModel = viewModel
+    }
+
     var body: some View {
-        ZStack {
-            Color(UIColor(red: 0.81, green: 0.91, blue: 0.97, alpha: 1.00))
-                .edgesIgnoringSafeArea(.all)
-            VStack{
-                ZStack(alignment: .top) {
-                    Button {
-                        shouldShowImagePicker.toggle()
-                    } label: {
-                       
-                        
-                                 
-                        
-                    }
-                }.padding()
-                
-                TextField("username", text: $username)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                TextField("fullname", text: $fullname)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                TextField("email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-              
-                TextField("Date", text: $datenaissance)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-            
-                
-                
-                Section {
-                    Button("Save Changes") {
-                        let request = UpdateUserRequest(username: username, fullname: fullname, email: email, datedenaissance: datenaissance)
-                        viewModel.updateUser(request: request) {
-                            // handle completion, e.g.:
-                            print("User updated successfully!")
+        NavigationView {
+            ZStack {
+                Color("Background")
+                    .ignoresSafeArea()
+                VStack {
+                    Form {
+                        Section(header: Text("Personal Information")) {
+                            TextField("Username", text: $username)
+                            TextField("Full name", text: $fullname)
+                            TextField("Email", text: $email)
                         }
+
+                        Section {
+                            Button("Save Changes") {
+                                let request = UpdateUserRequest(username: username, fullname: fullname, email: email)
+                                viewModel.updateUser(request: request) {
+                                   
+                                    print("User updated successfully!")
+                                    showAlert = true
+                                }
+                            }
+                        }
+                    }
+                    if !viewModel.errorMessage.isEmpty {
+                        Text(viewModel.errorMessage)
+                            .foregroundColor(.red)
                     }
                 }
             }
-            if !viewModel.errorMessage.isEmpty {
-                Text(viewModel.errorMessage)
-                    .foregroundColor(.red)
+            .navigationTitle("Edit Profile")
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Success"), message: Text("User updated successfully!"), dismissButton: .default(Text("OK")))
             }
-            }
-            .padding()
-            .navigationViewStyle(StackNavigationViewStyle())
-            /*.fullScreenCover(isPresented: $shouldShowImagePicker, onDismiss: nil) {
-             ImagePicker(image: $image)
-             .ignoresSafeArea()
-             }*/
         }
     }
-    
 
 
-struct EditProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        EditProfileView()
+    func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 }
+
+

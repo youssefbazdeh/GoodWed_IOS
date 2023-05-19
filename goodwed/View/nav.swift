@@ -23,7 +23,7 @@ struct nav: View {
             }
             
             
-            GuestsPage()
+            ContentView2()
                 .tabItem(){
                 Image(systemName: "person.3")
                 Text("Guests")
@@ -34,9 +34,10 @@ struct nav: View {
                 Image(systemName: "person.crop.circle.fill")
                 Text("Budget")
             }
-            ProfilePage()
+       
+            SettingsView()
                 .tabItem(){
-                Image(systemName: "person.crop.circle.fill")
+                Image(systemName: "wrench")
                 Text("Profile")
             }
             
